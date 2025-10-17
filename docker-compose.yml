@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: tasks_db
+    environment:
+      POSTGRES_USER: tasks_user
+      POSTGRES_PASSWORD: tasks_password
+      POSTGRES_DB: tasks_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tasks_user -d tasks_db"]
+      interval: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: tasks_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: tasks_frontend
+    env_file:
+      - .env
+    ports:
+      - "3000:80"
+
+volumes:
+  db_data:
