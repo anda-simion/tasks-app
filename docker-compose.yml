@@ -1,4 +1,4 @@
-version: "3.9"
+# version: "3.9"
 
 services:
   db:
@@ -25,8 +25,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://tasks_user:tasks_password@db:5432/tasks_db
     ports:
       - "8000:8000"
 
